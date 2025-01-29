@@ -12,7 +12,7 @@ RSS_FEEDS = [
 ]
 
 # 🔍 検索するキーワード（ライブ発表関連）
-KEYWORDS = ["京セラドーム", "ヤンマースタジアム", "ライブ", "ツアー", "発表", "kyocera"]
+KEYWORDS = ["京セラドーム", "ヤンマースタジアム", "kyocera"]
 
 # 🚀 SlackのWebhook URL（GitHub Secretsに設定）
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
