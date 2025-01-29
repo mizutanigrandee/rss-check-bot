@@ -1,0 +1,39 @@
+name: RSS Check
+
+on:
+  schedule:
+    - cron: "0 * * * *"  # 毎時0分に実行
+  workflow_dispatch:  # 手動実行も可能
+
+jobs:
+  rss_job:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # GitHubにデータを保存するため
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install feedparser requests
+
+      - name: Run RSS scraper
+        run: python check_rss.py
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Commit updated found_news.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add found_news.json
+          git commit -m "Update found_news.json" || echo "No changes to commit."
+          git push
