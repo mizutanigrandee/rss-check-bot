@@ -2,7 +2,7 @@ name: RSS Check
 
 on:
   schedule:
-    - cron: "0 * * * *"  # 毎時0分に実行
+    - cron: "0,30 7-23 * * *"  # 日本時間 7:00～23:30 の間、30分ごとに実行
   workflow_dispatch:  # 手動実行も可能
 
 jobs:
