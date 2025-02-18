@@ -2,8 +2,10 @@ import feedparser
 import requests
 import os
 import json
+import datetime
+import pytz
 
-# 監視対象のRSSフィード（4つのサイト）
+# RSSフィードの設定（例）
 RSS_FEEDS = [
     "https://mdpr.jp/rss",
     "https://www.thefirsttimes.jp/feed/",
@@ -11,46 +13,32 @@ RSS_FEEDS = [
     "https://www.billboard-japan.com/rss_data/music_news"
 ]
 
-# 検索するキーワード
-# 既存のキーワードに加え、「ヤンマースタジアム長居」と「京セラドーム大阪」を追加
-KEYWORDS = [
-    "京セラドーム", 
-    "京セラドーム大阪", 
-    "ヤンマースタジアム", 
-    "ヤンマースタジアム長居", 
-    "kyocera", 
-    "osaka"
-]
+# 検索キーワード（例）
+KEYWORDS = ["京セラドーム", "京セラドーム大阪", "ヤンマースタジアム", "ヤンマースタジアム長居", "kyocera", "osaka"]
 
-# SlackのWebhook URL（GitHub Secretsに設定）
+# Slack Webhook URL（GitHub Secretsで設定済み）
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
 
-# 過去に通知したニュースを保存するファイル
+# 通知済み記事の記録ファイル
 FOUND_NEWS_FILE = "found_news.json"
+# 夜間に取得した記事を一時保存するファイル
+NIGHT_NOTIFICATIONS_FILE = "night_notifications.json"
 
-def load_found_news():
-    """
-    過去に通知したニュースをロードする。
-    ファイルが存在しないか破損している場合は、空の辞書を返す。
-    形式: { "記事リンク": "記事タイトル", ... }
-    """
+def current_jst_time():
+    return datetime.datetime.now(pytz.timezone("Asia/Tokyo"))
+
+def load_json_file(filename):
     try:
-        with open(FOUND_NEWS_FILE, "r", encoding="utf-8") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
-def save_found_news(data):
-    """
-    通知済みニュースをファイルに保存する。
-    """
-    with open(FOUND_NEWS_FILE, "w", encoding="utf-8") as f:
+def save_json_file(data, filename):
+    with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def send_slack_message(text):
-    """
-    Slackにメッセージを送信する。
-    """
     if not SLACK_WEBHOOK_URL:
         print("Slack Webhook URL が設定されていません")
         return
@@ -63,31 +51,54 @@ def send_slack_message(text):
         print(f"Slack送信エラー: {e}")
 
 if __name__ == "__main__":
-    found_news = load_found_news()  # 過去の通知済みニュースを取得
+    now = current_jst_time()
+    # 日中: 7:00 <= time < 23:30
+    daytime = now.hour >= 7 and (now.hour < 23 or (now.hour == 23 and now.minute < 30))
+    # 夜間: 23:30 <= time or time < 7
+    nighttime = not daytime
+
+    found_news = load_json_file(FOUND_NEWS_FILE)
+    night_notifications = load_json_file(NIGHT_NOTIFICATIONS_FILE)
 
     for feed_url in RSS_FEEDS:
         feed = feedparser.parse(feed_url)
         for entry in feed.entries:
             title = entry.title if hasattr(entry, "title") else ""
-            # summary もしくは description を取得
+            summary = ""
             if hasattr(entry, "summary"):
                 summary = entry.summary
             elif hasattr(entry, "description"):
                 summary = entry.description
-            else:
-                summary = ""
             link = entry.link if hasattr(entry, "link") else ""
 
-            # キーワードのチェックを、タイトルと本文の両方に対して小文字で実施
+            # 小文字に変換してキーワードチェック
             title_lower = title.lower()
             summary_lower = summary.lower()
             if any(keyword.lower() in title_lower or keyword.lower() in summary_lower for keyword in KEYWORDS):
-                # 既に通知済みの記事はスキップ
+                # 過去通知済みかチェック
                 if link not in found_news:
-                    msg = f"【新ライブニュース】\nアーティスト情報は各メディアでご確認ください。\nタイトル: {title}\n概要: {summary}\nリンク: {link}"
-                    print(msg)
-                    send_slack_message(msg)
-                    found_news[link] = title  # 通知済みリストに追加
+                    msg = f"【新ライブニュース】\nタイトル: {title}\n概要: {summary}\nリンク: {link}"
+                    if daytime:
+                        # 日中は即時通知
+                        print("【日中通知】", msg)
+                        send_slack_message(msg)
+                    elif nighttime:
+                        # 夜間は保存しておく
+                        print("【夜間保存】", msg)
+                        night_notifications[link] = title
+                    # 記録に追加
+                    found_news[link] = title
 
-    save_found_news(found_news)
+    # 夜間であれば、保存ファイルを更新（翌朝に送信するために残す）
+    save_json_file(found_news, FOUND_NEWS_FILE)
+    save_json_file(night_notifications, NIGHT_NOTIFICATIONS_FILE)
 
+    # 朝7:00～7:15頃に、夜間に保存していた通知を一括送信する
+    if now.hour == 7 and now.minute < 15 and night_notifications:
+        batch_msg = "【朝一括通知】\n"
+        for link, title in night_notifications.items():
+            batch_msg += f"タイトル: {title}\nリンク: {link}\n\n"
+        print("【朝通知】", batch_msg)
+        send_slack_message(batch_msg)
+        # 送信後、夜間保存データをクリア
+        save_json_file({}, NIGHT_NOTIFICATIONS_FILE)
