@@ -7,10 +7,12 @@ import pytz
 
 # RSSフィードの設定（例）
 RSS_FEEDS = [
-    "https://mdpr.jp/rss",
+    "https://feed.mdpr.jp/rss/export/mdpr-topics.xml",
     "https://www.thefirsttimes.jp/feed/",
     "https://natalie.mu/music/feed/news",
-    "https://www.billboard-japan.com/rss_data/music_news"
+    "https://news.yahoo.co.jp/rss/media/natalien/all.xml ",
+　　"https://news.yahoo.co.jp/rss/media/mdpr/all.xml",
+    "https://news.yahoo.co.jp/rss/media/exp/all.xml"
 ]
 
 # 検索キーワード（例）
