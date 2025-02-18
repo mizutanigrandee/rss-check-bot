@@ -2,38 +2,31 @@ name: RSS Check
 
 on:
   schedule:
-    - cron: "0,30 7-23 * * *"  # 日本時間 7:00～23:30 の間、30分ごとに実行
-  workflow_dispatch:  # 手動実行も可能
+    - cron: "*/15 * * * *"  # 15分ごとに実行
+  workflow_dispatch:
 
 jobs:
   rss_job:
     runs-on: ubuntu-latest
-
     permissions:
-      contents: write  # GitHubにデータを保存するため
-
+      contents: write
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-
       - name: Install dependencies
-        run: pip install feedparser requests
-
+        run: pip install feedparser requests pytz
       - name: Run RSS scraper
         run: python check_rss.py
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      - name: Commit updated found_news.json
+      - name: Commit updated notification files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add found_news.json
-          git commit -m "Update found_news.json" || echo "No changes to commit."
+          git add found_news.json night_notifications.json
+          git commit -m "Update notification files" || echo "No changes to commit."
           git push
