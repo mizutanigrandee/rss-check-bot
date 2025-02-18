@@ -10,8 +10,8 @@ RSS_FEEDS = [
     "https://feed.mdpr.jp/rss/export/mdpr-topics.xml",
     "https://www.thefirsttimes.jp/feed/",
     "https://natalie.mu/music/feed/news",
-    "https://news.yahoo.co.jp/rss/media/natalien/all.xml ",
-　　"https://news.yahoo.co.jp/rss/media/mdpr/all.xml",
+    "https://news.yahoo.co.jp/rss/media/natalien/all.xml",
+    "https://news.yahoo.co.jp/rss/media/mdpr/all.xml",
     "https://news.yahoo.co.jp/rss/media/exp/all.xml"
 ]
 
@@ -91,7 +91,6 @@ if __name__ == "__main__":
                     # 記録に追加
                     found_news[link] = title
 
-    # 夜間であれば、保存ファイルを更新（翌朝に送信するために残す）
     save_json_file(found_news, FOUND_NEWS_FILE)
     save_json_file(night_notifications, NIGHT_NOTIFICATIONS_FILE)
 
