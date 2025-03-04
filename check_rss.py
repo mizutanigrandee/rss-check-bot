@@ -13,6 +13,8 @@ RSS_FEEDS = [
     "https://news.yahoo.co.jp/rss/media/natalien/all.xml",
     "https://news.yahoo.co.jp/rss/media/mdpr/all.xml",
     "https://news.yahoo.co.jp/rss/media/exp/all.xml"
+    "https://news.yahoo.co.jp/rss/media/oric/all.xml"
+    "https://news.yahoo.co.jp/rss/media/kstylens/all.xml"
 ]
 
 # 検索キーワード（例）
