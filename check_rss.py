@@ -18,7 +18,7 @@ RSS_FEEDS = [
 ]
 
 # 検索キーワード（例）
-KEYWORDS = ["京セラドーム", "京セラドーム大阪", "ヤンマースタジアム", "ヤンマースタジアム長居", "kyocera", "ドームツアー", "スタジアムツアー", "アリーナツアー"]
+KEYWORDS = ["京セラドーム", "京セラドーム大阪", "ヤンマースタジアム", "ヤンマースタジアム長居", "kyocera", "ドームツアー", "スタジアムツアー", "アジアツアー", "全国ツアー"]
 
 # Slack Webhook URL（GitHub Secretsで設定済み）
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
