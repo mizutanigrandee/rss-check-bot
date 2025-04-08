@@ -75,23 +75,38 @@ if __name__ == "__main__":
                 summary = entry.description
             link = entry.link if hasattr(entry, "link") else ""
 
-            # 小文字に変換してキーワードチェック
-            title_lower = title.lower()
-            summary_lower = summary.lower()
-            if any(keyword.lower() in title_lower or keyword.lower() in summary_lower for keyword in KEYWORDS):
-                # 過去通知済みかチェック
-                if link not in found_news:
-                    msg = f"【新ライブニュース】\nタイトル: {title}\n概要: {summary}\nリンク: {link}"
-                    if daytime:
-                        # 日中は即時通知
-                        print("【日中通知】", msg)
-                        send_slack_message(msg)
-                    elif nighttime:
-                        # 夜間は保存しておく
-                        print("【夜間保存】", msg)
-                        night_notifications[link] = title
-                    # 記録に追加
-                    found_news[link] = title
+# 小文字に変換してキーワードチェック
+title_lower = title.lower()
+summary_lower = summary.lower()
+
+# マッチしたキーワードを抽出
+hit_keywords = [
+    keyword for keyword in KEYWORDS
+    if keyword.lower() in title_lower or keyword.lower() in summary_lower
+]
+
+if hit_keywords:
+    # 過去通知済みかチェック
+    if link not in found_news:
+        hit_keywords_str = "、".join(hit_keywords)
+        msg = (
+            f"【新ライブニュース】\n"
+            f"タイトル: {title}\n"
+            f"概要: {summary}\n"
+            f"リンク: {link}\n"
+            f"🔍ヒットキーワード: {hit_keywords_str}"
+        )
+        if daytime:
+            # 日中は即時通知
+            print("【日中通知】", msg)
+            send_slack_message(msg)
+        elif nighttime:
+            # 夜間は保存しておく
+            print("【夜間保存】", msg)
+            night_notifications[link] = f"{title}（KW: {hit_keywords_str}）"
+        # 記録に追加
+        found_news[link] = title
+
 
     save_json_file(found_news, FOUND_NEWS_FILE)
     save_json_file(night_notifications, NIGHT_NOTIFICATIONS_FILE)
