@@ -1,4 +1,3 @@
-```python
 import feedparser
 import requests
 import os
@@ -20,7 +19,11 @@ RSS_FEEDS = [
 
 # 検索キーワード（例）
 KEYWORDS = [
-    "京セラドーム", "京セラドーム大阪", "ヤンマースタジアム", "ヤンマースタジアム長居", "kyocera", "ドームツアー", "スタジアムツアー", "アジアツアー", "全国ツアー", "アリーナツアー", "ライブツアー", "ジャパンツアー", "ライブ情報解禁", "来日公演"
+    "京セラドーム", "京セラドーム大阪", "ヤンマースタジアム",
+    "ヤンマースタジアム長居", "kyocera", "ドームツアー",
+    "スタジアムツアー", "アジアツアー", "全国ツアー",
+    "アリーナツアー", "ライブツアー", "ジャパンツアー",
+    "ライブ情報解禁", "来日公演"
 ]
 
 # Slack Webhook URL（GitHub Secretsで設定済み）
@@ -132,5 +135,3 @@ if __name__ == "__main__":
         print("【朝通知】", batch_msg)
         if send_slack_message(batch_msg):
             save_json_file({}, NIGHT_NOTIFICATIONS_FILE)
-```
-
