@@ -75,15 +75,17 @@ if __name__ == "__main__":
                 summary = entry.description
             link = entry.link if hasattr(entry, "link") else ""
 
-# 小文字に変換してキーワードチェック
-title_lower = title.lower()
-summary_lower = summary.lower()
+            # 小文字に変換してキーワードチェック
+            # ⇒ 全文（タイトル・要約・本文）を結合してチェックするよう変更
+            content = ""
+            if hasattr(entry, "content") and entry.content:
+                content = entry.content[0].value
+            full_text = "\n".join([title, summary, content]).lower()
 
-# マッチしたキーワードを抽出
-hit_keywords = [
-    keyword for keyword in KEYWORDS
-    if keyword.lower() in title_lower or keyword.lower() in summary_lower
-]
+            hit_keywords = [
+                keyword for keyword in KEYWORDS
+                if keyword.lower() in full_text
+            ]
 
 if hit_keywords:
     # 過去通知済みかチェック
