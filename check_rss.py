@@ -1,3 +1,4 @@
+```python
 import feedparser
 import requests
 import os
@@ -62,25 +63,24 @@ if __name__ == "__main__":
     # 日中判定：7:00〜23:30を日中とみなす
     daytime = now.hour >= 7 and (now.hour < 23 or (now.hour == 23 and now.minute < 30))
 
-    # 既通知記事＆夜間保存記事をロード
     found_news = load_json_file(FOUND_NEWS_FILE)
     night_notifications = load_json_file(NIGHT_NOTIFICATIONS_FILE)
 
-    # --- 朝７時以降の最初の実行時に夜間分を一括送信 ---
+    # 朝一括通知
     if daytime and night_notifications:
         batch_msg = "【朝一括通知】\n"
         for link, title in night_notifications.items():
             batch_msg += f"タイトル: {title}\nリンク: {link}\n\n"
         print("【朝一括通知】", batch_msg)
         if send_slack_message(batch_msg):
-            # 送信成功ならクリア
             night_notifications.clear()
 
-    # 新着フィードチェック
+    # フィードチェック
     for feed_url in RSS_FEEDS:
         feed = feedparser.parse(feed_url)
         for entry in feed.entries:
             title = entry.title if hasattr(entry, "title") else ""
+            # タイトル＋要約のみ取得
             summary = ""
             if hasattr(entry, "summary"):
                 summary = entry.summary
@@ -88,18 +88,15 @@ if __name__ == "__main__":
                 summary = entry.description
             link = entry.link if hasattr(entry, "link") else ""
 
-            # 全文チェック（title, summary, content:encoded）
-            content = ""
-            if hasattr(entry, "content") and entry.content:
-                content = entry.content[0].value
-            full_text = "\n".join([title, summary, content]).lower()
+            # 小文字化してキーワードチェック
+            title_lower = title.lower()
+            summary_lower = summary.lower()
 
             hit_keywords = [
                 kw for kw in KEYWORDS
-                if kw.lower() in full_text
+                if kw.lower() in title_lower or kw.lower() in summary_lower
             ]
 
-            # キーワードヒット＆未通知なら通知 or 夜間保存
             if hit_keywords and link not in found_news:
                 hit_keywords_str = "、".join(hit_keywords)
                 msg = (
@@ -116,6 +113,6 @@ if __name__ == "__main__":
                     night_notifications[link] = f"{title}（KW: {hit_keywords_str}）"
                     found_news[link] = title
 
-    # 永続化
     save_json_file(found_news, FOUND_NEWS_FILE)
     save_json_file(night_notifications, NIGHT_NOTIFICATIONS_FILE)
+```
