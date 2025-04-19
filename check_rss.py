@@ -1,4 +1,3 @@
-```python
 import feedparser
 import requests
 import os
@@ -60,13 +59,11 @@ def send_slack_message(text):
 
 if __name__ == "__main__":
     now = current_jst_time()
-    # 日中判定：7:00〜23:30を日中とみなす
     daytime = now.hour >= 7 and (now.hour < 23 or (now.hour == 23 and now.minute < 30))
 
     found_news = load_json_file(FOUND_NEWS_FILE)
     night_notifications = load_json_file(NIGHT_NOTIFICATIONS_FILE)
 
-    # 朝一括通知
     if daytime and night_notifications:
         batch_msg = "【朝一括通知】\n"
         for link, title in night_notifications.items():
@@ -75,12 +72,10 @@ if __name__ == "__main__":
         if send_slack_message(batch_msg):
             night_notifications.clear()
 
-    # フィードチェック
     for feed_url in RSS_FEEDS:
         feed = feedparser.parse(feed_url)
         for entry in feed.entries:
             title = entry.title if hasattr(entry, "title") else ""
-            # タイトル＋要約のみ取得
             summary = ""
             if hasattr(entry, "summary"):
                 summary = entry.summary
@@ -88,7 +83,6 @@ if __name__ == "__main__":
                 summary = entry.description
             link = entry.link if hasattr(entry, "link") else ""
 
-            # 小文字化してキーワードチェック
             title_lower = title.lower()
             summary_lower = summary.lower()
 
@@ -115,4 +109,3 @@ if __name__ == "__main__":
 
     save_json_file(found_news, FOUND_NEWS_FILE)
     save_json_file(night_notifications, NIGHT_NOTIFICATIONS_FILE)
-```
