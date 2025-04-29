@@ -7,9 +7,7 @@ import pytz
 
 # RSSフィードの設定
 RSS_FEEDS = [
-    "https://feed.mdpr.jp/rss/export/mdpr-topics.xml",
     "https://www.thefirsttimes.jp/feed/",
-    "https://natalie.mu/music/feed/news",
     "https://news.yahoo.co.jp/rss/media/natalien/all.xml",
     "https://news.yahoo.co.jp/rss/media/mdpr/all.xml",
     "https://news.yahoo.co.jp/rss/media/exp/all.xml",
@@ -21,7 +19,7 @@ RSS_FEEDS = [
 KEYWORDS = [
     "京セラドーム", "京セラドーム大阪", "ヤンマースタジアム", "ヤンマースタジアム長居",
     "kyocera", "ドームツアー", "スタジアムツアー", "アジアツアー", 
-    "アリーナツアー", "ライブツアー", "ジャパンツアー", "ライブ情報解禁",
+    "アリーナツアー", "ライブツアー",  "ライブ情報解禁",
 ]
 
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL")
