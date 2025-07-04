@@ -5,6 +5,9 @@ import json
 import datetime
 import pytz
 
+# --- 追加: 除外キーワード ---
+EXCLUDE_KEYWORDS = ["ライブレポート"]   # 必要に応じて増やせます
+
 # RSSフィードの設定
 RSS_FEEDS = [
     "https://www.thefirsttimes.jp/feed/",
@@ -83,6 +86,10 @@ if __name__ == "__main__":
 
             title_lower = title.lower()
             summary_lower = summary.lower()
+
+            # --- ここで「ライブレポート」記事を除外 ---
+            if any(x in title or x in summary for x in EXCLUDE_KEYWORDS):
+                continue
 
             hit_keywords = [
                 kw for kw in KEYWORDS
