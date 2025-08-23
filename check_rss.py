@@ -5,8 +5,10 @@ import json
 import datetime
 import pytz
 
+
+
 # --- 追加: 除外キーワード ---
-EXCLUDE_KEYWORDS = ["ライブレポート"]   # 必要に応じて増やせます
+EXCLUDE_KEYWORDS = ["ライブレポート", "関西コレクション","関コレ","始球式","映像作品","完走",]   # 必要に応じて増やせます
 
 # RSSフィードの設定
 RSS_FEEDS = [
